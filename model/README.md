@@ -276,3 +276,67 @@
     - "post_likes_post_id_fkey" FOREIGN KEY (post_id) REFERENCES post(id) ON DELETE CASCADE
 
     </details>
+
+4.  **Create Triggers**
+
+    <details>
+    <summary><strong>For Updating LIKE Counter in Post</strong> </summary>
+
+    ```sql
+
+    CREATE FUNCTION updateLike() RETURNS TRIGGER
+        AS $BODY$
+            BEGIN
+                IF (TG_OP = 'INSERT') THEN
+                    UPDATE POSTS
+                        set LIKE_COUNT = LIKE_COUNT + 1
+                        where id = new.POST_ID;
+                    RETURN NEW;
+                ELSIF (TG_OP='DELETE') THEN
+                    UPDATE POSTS
+                        set LIKE_COUNT = LIKE_COUNT - 1
+                        where id = old.POST_ID;
+                    RETURN OLD;
+                END IF;
+                RETURN NULL;
+            END;
+        $BODY$
+    LANGUAGE plpgsql;
+
+    CREATE TRIGGER UPDATE_LIKE_COUNT
+        AFTER INSERT OR DELETE ON POST_LIKES
+        FOR EACH ROW EXECUTE PROCEDURE updateLike();
+    ```
+
+    </details>
+
+    <details>
+    <summary><strong>For Updating Post Count in tags</strong> </summary>
+
+    ```sql
+    CREATE FUNCTION updatePostCount() RETURNS TRIGGER
+        AS $BODY$
+            BEGIN
+                IF (TG_OP = 'INSERT') THEN
+                    UPDATE TAGS
+                        set TOTAL_POST = TOTAL_POST + 1
+                        where id = new.TAG_ID;
+                    RETURN NEW;
+                ELSIF (TG_OP='DELETE') THEN
+                    UPDATE TAGS
+                        set TOTAL_POST = TOTAL_POST - 1
+                        where id = old.TAG_ID;
+                    RETURN OLD;
+                END IF;
+                RETURN NULL;
+            END;
+        $BODY$
+    LANGUAGE plpgsql;
+
+    CREATE TRIGGER UPDATE_TAG_POST_COUNT
+        AFTER INSERT OR DELETE ON POST_TAGS
+        FOR EACH ROW EXECUTE PROCEDURE updatePostCount();
+
+    ```
+
+    </details>
