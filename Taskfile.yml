@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+  migration:
+    cmds:
+      - createdb -h localhost -p 5432 -U postgres blog
+      - psql -h localhost -p 5432 -U postgres blog < .\model\Init_model.sql
+    silent: true
+  demigration:
+    cmds:
+      - psql -h localhost -p 5432 -U postgres < .\model\Delete_model.sql
+    silent: true
