@@ -1,6 +1,6 @@
 
 -- Create Blog DataBase
-CREATE DATABASE BLOG;
+CREATE DATABASE IF NOT EXISTS BLOG;
 
 -- Select Blog database
 
