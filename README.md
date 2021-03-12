@@ -8,6 +8,9 @@ Basic blog server written in go for CRUD operation
 
 - [x] Write Database schema
 - [x] Create Database Trigger for like_count(posts), total_post(tags)
+- [ ] Create Model Function in Golang
+- [ ] Refactoring Code
+- [ ] Write Unit Test of model
 - [ ] Connect Database with GO
 - [ ] Design All API end-points
 - [ ] Implement API in REST
@@ -18,36 +21,11 @@ Basic blog server written in go for CRUD operation
 
 # TMP API end-points
 
-user
-POST SignUp
-POST login
-
-PATCH update account -> update users set last_login=current_timestamp where username='abc';
-PUT new password token -> update users set password_hashed='password', last_login=current_timestamp where username='abc';
-
-    GET liked posts
-
-    POST a like on post
-    DELETE a like on post
-    POST a Comment on Post
-
-GET Comments By Post id
-DELETE a Comment on post
-
-    GET User Data By id
-
-Post
-
-get/create draft Post -> insert into posts(author_id,title) values(7,'Thats bad');
-PATCH Save draft Post
-PUT Post Content
-PATCH Publish Post
-
-GET finished Post by id
-
-GET finished Posts(By Length)
-
-Tag
-GET Tags(By length)
-GET Tag detail By id
-GET Tag Post(Top By given data<length of tag_post)
+- Comment
+  - POST a Comment on Post
+  - GET Comments By Post id
+  - DELETE a Comment on post
+- Tag
+  - GET Tags(By length)
+  - GET Tag detail By id
+  - GET Tag Post(Top By given data<length of tag_post)
