@@ -15,7 +15,7 @@ type DB struct {
 // User is the model present in the database
 type User struct {
 	ID             uint32    `json:"id"`
-	UserName       string    `json:"nickname"`
+	UserName       string    `json:"username"`
 	Email          string    `json:"email"`
 	PasswordHashed string    `json:"password"`
 	CreatedOn      time.Time `json:"created_on"`
@@ -31,13 +31,13 @@ type UserInterface interface {
 	PutNewPassword(db *pgxpool.Pool, newPassword string) error
 	FindByID(db *pgxpool.Pool, uid int64) (*User, error)
 	GetLikedPost(db *pgxpool.Pool) ([]int64, error)
-	PostLike(db *pgxpool.Pool, postID int64) error
+	PatchLike(db *pgxpool.Pool, postID int64) error
 }
 
 // Post is the model present in the database
 type Post struct {
 	ID        int       `json:"id"`
-	AuthorID  int       `json:"user_id"`
+	AuthorID  int       `json:"author_id"`
 	Title     string    `json:"title"`
 	Summary   string    `json:"summary"`
 	Body      string    `json:"body"`
@@ -55,6 +55,22 @@ type PostInterface interface {
 	GetDraft(db *pgxpool.Pool) error
 	PatchDrafted(db *pgxpool.Pool) error
 	Get(db *pgxpool.Pool) error
+}
+
+// Store Data regarding commments
+type Comment struct {
+	ID        int       `json:"id"`
+	AuthorID  int       `json:"author_id"`
+	Body      string    `json:"body"`
+	CreatedOn time.Time `json:"created_on"`
+	UpdatedOn time.Time `json:"updated_on"`
+}
+
+type Tag struct {
+	ID        int    `json:"id"`
+	Title     string `json:"title"`
+	Summary   string `json:"summary"`
+	TotalPost int    `json:"total_post"`
 }
 
 // Connect Will Start the Connection to the PostgreSQL
