@@ -166,8 +166,8 @@ func (u *User) GetLikedPost(db *pgxpool.Pool) ([]int64, error) {
 	return result, nil
 }
 
-// PostLike will can put like/Remove like from a post
-func (u *User) PostLike(db *pgxpool.Pool, postID int64) error {
+// PatchLike will can put like/Remove like from a post
+func (u *User) PatchLike(db *pgxpool.Pool, postID int64) error {
 	var doesLike int
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
