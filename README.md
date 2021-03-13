@@ -8,10 +8,10 @@ Basic blog server written in go for CRUD operation
 
 - [x] Write Database schema
 - [x] Create Database Trigger for like_count(posts), total_post(tags)
-- [ ] Create Model Function in Golang
-- [ ] Refactoring Code
+- [x] Connect Database with GO
+- [x] Create Model Function in Golang
+- [x] Refactoring Code
 - [ ] Write Unit Test of model
-- [ ] Connect Database with GO
 - [ ] Design All API end-points
 - [ ] Implement API in REST
   - [ ] Write open API end-points
@@ -21,11 +21,11 @@ Basic blog server written in go for CRUD operation
 
 # TMP API end-points
 
-- Comment
-  - POST a Comment on Post
-  - GET Comments By Post id
-  - DELETE a Comment on post
+- Post delete, delete its comment
 - Tag
-  - GET Tags(By length)
+  - Create Tag
+  - Add tag on Post
+  - Delete tag from Post
+  - Get tags (Sorted)
   - GET Tag detail By id
   - GET Tag Post(Top By given data<length of tag_post)
