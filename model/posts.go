@@ -15,7 +15,7 @@ func (p *Post) Init(author int, title string, summary string) {
 	p.Title = title
 	p.Summary = summary
 }
-func (p *Post) Validate(action string) error {
+func (p *Post) validate(action string) error {
 	switch strings.ToLower(action) {
 	case "create":
 		if p.AuthorID == 0 {
@@ -49,10 +49,9 @@ func (p *Post) Validate(action string) error {
 
 //CreatePost will create a draft of post on the database
 func (p *Post) Create(db *pgxpool.Pool) error {
-	if err := p.Validate("create"); err != nil {
+	if err := p.validate("create"); err != nil {
 		return err
 	}
-	var postID int
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if rows, err := db.Query(ctx, "INSERT INTO posts(AUTHOR_ID,TITLE,SUMMARY) VALUES($1,$2,$3) returning id;", p.AuthorID, p.Title, p.Summary); err != nil {
@@ -61,19 +60,18 @@ func (p *Post) Create(db *pgxpool.Pool) error {
 		defer rows.Close()
 
 		rows.Next()
-		rows.Scan(&postID)
+		rows.Scan(&p.ID)
 
 		if rows.Err() != nil {
 			return err
 		}
 	}
-	p.ID = postID
 	return nil
 }
 
 // GetDraftPost get the Drafted Post from Database
 func (p *Post) GetDraft(db *pgxpool.Pool) error {
-	if err := p.Validate("draft"); err != nil {
+	if err := p.validate("draft"); err != nil {
 		return err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -86,7 +84,7 @@ func (p *Post) GetDraft(db *pgxpool.Pool) error {
 
 // PatchDraftedPost Update's Drafted Post, Update the values of Post object before calling it
 func (p *Post) PatchDrafted(db *pgxpool.Pool) error {
-	if err := p.Validate("draft"); err != nil {
+	if err := p.validate("draft"); err != nil {
 		return err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -115,12 +113,12 @@ func (p *Post) Get(db *pgxpool.Pool) error {
 	return nil
 }
 
-// GetTop return ID's of top viewed Posts. length is the limit of post require. REQUIRE:length
-func GetTop(db *pgxpool.Pool, length int) ([]int, error) {
+// GetTop return ID's of top viewed Posts. length is the limit of post require. REQUIRE:limit
+func GetTop(db *pgxpool.Pool, limit int) ([]int, error) {
 	var data []int
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if rows, err := db.Query(ctx, " SELECT ID FROM POSTS ORDER BY posts.views DESC LIMIT $1;", length); err != nil {
+	if rows, err := db.Query(ctx, " SELECT ID FROM POSTS ORDER BY posts.views DESC LIMIT $1;", limit); err != nil {
 		return []int{}, err
 	} else {
 		defer rows.Close()
