@@ -28,24 +28,15 @@ func (c *Comment) validation(action string) error {
 	return nil
 }
 
-// Post will put comment on a post
+// Post will put comment on a post. REQUIRE: postID
 func (c *Comment) Post(db *pgxpool.Pool, postID int64) error {
 	if err := c.validation("create"); err != nil {
 		return err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if rows, err := db.Query(ctx, "INSERT INTO comments(AUTHOR_ID,BODY) VALUES($1,$2) returning id;", c.AuthorID, c.Body); err != nil {
+	if err := db.QueryRow(ctx, "INSERT INTO comments(AUTHOR_ID,BODY) VALUES($1,$2) returning id;", c.AuthorID, c.Body).Scan(&c.ID); err != nil {
 		return err
-	} else {
-		defer rows.Close()
-
-		rows.Next()
-		rows.Scan(&c.ID)
-
-		if rows.Err() != nil {
-			return err
-		}
 	}
 	if _, err := db.Exec(ctx, "INSERT INTO POST_COMMENTS(COMMENT_ID,POST_ID) VALUES($1,$2);", c.ID, postID); err != nil {
 		return err
@@ -53,8 +44,8 @@ func (c *Comment) Post(db *pgxpool.Pool, postID int64) error {
 	return nil
 }
 
-// Delete a comment from a post
-func (c *Comment) Delete(db *pgxpool.Pool, postID int) error {
+// Delete a comment from a post. REQUIRE: CommentID
+func (c *Comment) Delete(db *pgxpool.Pool) error {
 	if err := c.validation("delete"); err != nil {
 		return err
 	}
@@ -66,7 +57,7 @@ func (c *Comment) Delete(db *pgxpool.Pool, postID int) error {
 	return nil
 }
 
-// GetComments will return All the comments on a post
+// GetComments will return All the comments on a post,REQUIRE: PostID
 func GetComments(db *pgxpool.Pool, postID int64) ([]Comment, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

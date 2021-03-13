@@ -47,29 +47,20 @@ func (p *Post) validate(action string) error {
 	}
 }
 
-//CreatePost will create a draft of post on the database
+//Create will create a draft of post on the database. REQUIRE:AuthorID, Title, ?Summary
 func (p *Post) Create(db *pgxpool.Pool) error {
 	if err := p.validate("create"); err != nil {
 		return err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if rows, err := db.Query(ctx, "INSERT INTO posts(AUTHOR_ID,TITLE,SUMMARY) VALUES($1,$2,$3) returning id;", p.AuthorID, p.Title, p.Summary); err != nil {
+	if err := db.QueryRow(ctx, "INSERT INTO posts(AUTHOR_ID,TITLE,SUMMARY) VALUES($1,$2,$3) returning id;", p.AuthorID, p.Title, p.Summary).Scan(&p.ID); err != nil {
 		return err
-	} else {
-		defer rows.Close()
-
-		rows.Next()
-		rows.Scan(&p.ID)
-
-		if rows.Err() != nil {
-			return err
-		}
 	}
 	return nil
 }
 
-// GetDraftPost get the Drafted Post from Database
+// GetDraftPost get the Drafted Post from Database. REQUIRE:AuthorID, ID
 func (p *Post) GetDraft(db *pgxpool.Pool) error {
 	if err := p.validate("draft"); err != nil {
 		return err
@@ -82,7 +73,7 @@ func (p *Post) GetDraft(db *pgxpool.Pool) error {
 	return nil
 }
 
-// PatchDraftedPost Update's Drafted Post, Update the values of Post object before calling it
+// PatchDrafted Update's Drafted Post, Update the values of Post object before calling it. REQUIRE: AuthorID, PostID
 func (p *Post) PatchDrafted(db *pgxpool.Pool) error {
 	if err := p.validate("draft"); err != nil {
 		return err
@@ -95,14 +86,14 @@ func (p *Post) PatchDrafted(db *pgxpool.Pool) error {
 	return nil
 }
 
-// Get will update the post object with data stored in database REQUIRE: PostID
+// Get update the post object with published post stored in database REQUIRE: PostID
 func (p *Post) Get(db *pgxpool.Pool) error {
 	if p.ID == 0 {
 		return errors.New("post id is required")
 	}
 	ctx1, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if err := db.QueryRow(ctx1, "SELECT AUTHOR_ID,TITLE,SUMMARY,UPDATED_ON,LIKE_COUNT,VIEWS,BODY FROM POSTS WHERE ID=$1", p.ID).Scan(&p.AuthorID, &p.Title, &p.Summary, &p.UpdatedOn, &p.LikeCount, &p.Views, &p.Body); err != nil {
+	if err := db.QueryRow(ctx1, "SELECT AUTHOR_ID,TITLE,SUMMARY,UPDATED_ON,LIKE_COUNT,VIEWS,BODY FROM POSTS WHERE ID=$1 AND PUBLISHED='true'", p.ID).Scan(&p.AuthorID, &p.Title, &p.Summary, &p.UpdatedOn, &p.LikeCount, &p.Views, &p.Body); err != nil {
 		return err
 	}
 	ctx2, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -113,8 +104,8 @@ func (p *Post) Get(db *pgxpool.Pool) error {
 	return nil
 }
 
-// GetTop return ID's of top viewed Posts. length is the limit of post require. REQUIRE:limit
-func GetTop(db *pgxpool.Pool, limit int) ([]int, error) {
+// GetTop return ID's of top viewed Posts. limit is the max number of post require. REQUIRE:limit
+func GetTopPostIDs(db *pgxpool.Pool, limit int) ([]int, error) {
 	var data []int
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

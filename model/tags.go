@@ -27,7 +27,7 @@ func (t *Tag) validation(action string) error {
 	return nil
 }
 
-// Create will add tag In Database
+// Create will add tag In Database. REQUIRE: Title, Summary
 func (t *Tag) Create(db *pgxpool.Pool) error {
 	if err := t.validation("create"); err != nil {
 		return err
@@ -35,13 +35,13 @@ func (t *Tag) Create(db *pgxpool.Pool) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if _, err := db.Exec(ctx, "INSERT INTO TAGS(TITLE,SUMMARY) VALUES($1,$2);", t.Title, t.Summary); err != nil {
+	if err := db.QueryRow(ctx, "INSERT INTO TAGS(TITLE,SUMMARY) VALUES($1,$2) returning id;", t.Title, t.Summary).Scan(&t.ID); err != nil {
 		return err
 	}
 	return nil
 }
 
-//  AttachMe will add tag to a Post
+//  AttachMe will add tag to a Post. REQUIRE: TagID,PostID
 func (t *Tag) AttachMe(db *pgxpool.Pool, postID int) error {
 	if err := t.validation("attach"); err != nil {
 		return err
@@ -55,7 +55,7 @@ func (t *Tag) AttachMe(db *pgxpool.Pool, postID int) error {
 	return nil
 }
 
-//  Delete will remove tag from a post
+//  Delete will remove tag from a post. REQUIRE: TagID, PostID
 func (t *Tag) Delete(db *pgxpool.Pool, postID int) error {
 	if err := t.validation("delete"); err != nil {
 		return err
@@ -69,7 +69,7 @@ func (t *Tag) Delete(db *pgxpool.Pool, postID int) error {
 	return nil
 }
 
-// GetTagsData bring Top tags with data by limit
+// GetTagsData bring Top tags with data by limit, REQUIRE:Limit
 func GetTagsData(db *pgxpool.Pool, limit int) ([]Tag, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
