@@ -12,6 +12,8 @@ Basic blog server written in go for CRUD operation
 - [x] Create Model Function in Golang
 - [x] Refactoring Code
 - [ ] Write Unit Test of model
+- [ ] Write Mock Test on model
+- [ ] Change Error formate
 - [ ] Design All API end-points
 - [ ] Implement API in REST
   - [ ] Write open API end-points
