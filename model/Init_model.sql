@@ -1,7 +1,3 @@
-
--- Create Blog DataBase
-CREATE DATABASE BLOG;
-
 -- Select Blog database
 
 \c blog;
@@ -12,7 +8,7 @@ CREATE DATABASE BLOG;
         ID              SERIAL   PRIMARY KEY,
         USERNAME        VARCHAR(20) NOT NULL UNIQUE,
         EMAIL           VARCHAR(20) NOT NULL UNIQUE,
-        PASSWORD_HASHED VARCHAR(50) NOT NULL,
+        PASSWORD_HASHED VARCHAR(100) NOT NULL,
         CREATED_ON      timestamp DEFAULT CURRENT_TIMESTAMP,
         UPDATED_ON      timestamp DEFAULT CURRENT_TIMESTAMP,
         LAST_LOGIN      timestamp DEFAULT CURRENT_TIMESTAMP
@@ -144,26 +140,22 @@ CREATE DATABASE BLOG;
                     RETURN NULL;
                 END;
             $BODY$
-        LANGUAGE plpgsql;
+            LANGUAGE plpgsql;
 
-        CREATE TRIGGER UPDATE_TAG_POST_COUNT
-            AFTER INSERT OR DELETE ON POST_TAGS
-            FOR EACH ROW EXECUTE PROCEDURE updatePostCount();
--- Inserting Dummy Data
+            CREATE TRIGGER UPDATE_TAG_POST_COUNT
+                AFTER INSERT OR DELETE ON POST_TAGS
+                FOR EACH ROW EXECUTE PROCEDURE updatePostCount();
 
-INSERT INTO users(USERNAME,EMAIL,PASSWORD_HASHED) VALUES('Kush','kush@gmail.com','123');
-INSERT INTO users(USERNAME,EMAIL,PASSWORD_HASHED) VALUES('Jay','jay@gmail.com','123');
-INSERT INTO users(USERNAME,EMAIL,PASSWORD_HASHED) VALUES('Writer','author@gmail.com','123');
-
-INSERT INTO posts(AUTHOR_ID,TITLE) VALUES(3,'Testing 101');
-INSERT INTO posts(AUTHOR_ID,TITLE,PUBLISHED,BODY) VALUES(3,'Testing But Done PART 1','true','zxcvbnmnbvcasdfghfds');
-INSERT INTO posts(AUTHOR_ID,TITLE,PUBLISHED,BODY) VALUES(3,'Testing But Done PART 2','true','zxcvbnmnbvcasdfghfds');
-
-INSERT INTO POST_LIKES(AUTHOR_ID,POST_ID) VALUES(1,2);
-INSERT INTO POST_LIKES(AUTHOR_ID,POST_ID) VALUES(1,3);
-
-INSERT INTO Comments(author_id,body) VALUES(1,'Vary Cool post. Waiting for next part');
-INSERT INTO Comments(author_id,body) VALUES(1,'Awesome Series');
-
-INSERT INTO POST_COMMENTS(COMMENT_ID,POST_ID) VALUES(1,2);
-INSERT INTO POST_COMMENTS(COMMENT_ID,POST_ID) VALUES(2,3);
+    -- For Cleaning Tables
+        CREATE OR REPLACE FUNCTION truncate_tables(username IN VARCHAR) RETURNS void 
+        AS $BODY$
+            DECLARE
+                statements CURSOR FOR
+                    SELECT tablename FROM pg_tables
+                    WHERE tableowner = username AND schemaname = 'public';
+            BEGIN
+                FOR stmt IN statements LOOP
+                    EXECUTE 'TRUNCATE TABLE ' || quote_ident(stmt.tablename) || ' CASCADE;';
+                END LOOP;
+            END;
+        $BODY$ LANGUAGE plpgsql;
