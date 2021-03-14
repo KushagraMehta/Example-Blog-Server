@@ -55,7 +55,6 @@ func (u *User) validate(action string) error {
 		}
 		return nil
 	}
-	return nil
 }
 
 // init will initiate user object value.
@@ -68,20 +67,20 @@ func (u *User) Init(username, email, password string) error {
 }
 
 // SignUp will save user detail into database. REQUIRE: User Object init.
-func (u *User) SignUp(db *pgxpool.Pool) (uint32, error) {
+func (u *User) SignUp(db *pgxpool.Pool) (int, error) {
 	if err := u.validate("signup"); err != nil {
 		return 0, err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if err := db.QueryRow(ctx, "INSERT INTO users(username,email,password_hashed) VALUES ($1,$2,$3) returning id;", u.UserName, u.Email, u.PasswordHashed).Scan(&u.ID); err != nil {
+	if err := db.QueryRow(ctx, "INSERT INTO users(username,email,password_hashed) VALUES ($1,$2,$3) RETURNING id, created_on,updated_on,last_login;", u.UserName, u.Email, u.PasswordHashed).Scan(&u.ID, &u.CreatedOn, &u.UpdatedOn, &u.LastLogin); err != nil {
 		return 0, err
 	}
 	return u.ID, nil
 }
 
 // Login will check the user detail and send the UID  REQUIRE: username|email, PasswordHashed.
-func (u *User) Login(db *pgxpool.Pool) (uint32, error) {
+func (u *User) Login(db *pgxpool.Pool) (int, error) {
 
 	if err := u.validate(""); err != nil {
 		return 0, err
@@ -90,7 +89,7 @@ func (u *User) Login(db *pgxpool.Pool) (uint32, error) {
 	if u.UserName != "" {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		if err := db.QueryRow(ctx, "SELECT ID FROM users WHERE username=$1 AND password_hashed=$2;", u.UserName, u.PasswordHashed).Scan(&u.ID); err != nil {
+		if err := db.QueryRow(ctx, "SELECT ID,email,created_on,updated_on,last_login FROM users WHERE username=$1 AND password_hashed=$2;", u.UserName, u.PasswordHashed).Scan(&u.ID, &u.Email, &u.CreatedOn, &u.UpdatedOn, &u.LastLogin); err != nil {
 			return 0, err
 		}
 	} else {
@@ -182,7 +181,7 @@ func (u *User) PatchLike(db *pgxpool.Pool, postID int) error {
 		}
 	} else {
 		//If User likes it then dis-like the post
-		if _, err := db.Exec(ctx, "DELETE FROM POST_LIKES WHERE AUTHOR_ID=$1 AND POST_ID=$2);", u.ID, postID); err != nil {
+		if _, err := db.Exec(ctx, "DELETE FROM POST_LIKES WHERE AUTHOR_ID=$1 AND POST_ID=$2;", u.ID, postID); err != nil {
 			return err
 		}
 	}
@@ -190,7 +189,7 @@ func (u *User) PatchLike(db *pgxpool.Pool, postID int) error {
 }
 
 // FindUserByID will find a user with specific UID
-func FindUserByID(db *pgxpool.Pool, uid int64) (*User, error) {
+func FindUserByID(db *pgxpool.Pool, uid int) (*User, error) {
 	newUser := &User{}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

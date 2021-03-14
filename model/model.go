@@ -14,7 +14,7 @@ type DB struct {
 
 // User is the model present in the database
 type User struct {
-	ID             uint32    `json:"id,omitempty"`
+	ID             int       `json:"id,omitempty"`
 	UserName       string    `json:"username,omitempty"`
 	Email          string    `json:"email,omitempty"`
 	PasswordHashed string    `json:"-"`
@@ -26,10 +26,10 @@ type User struct {
 type UserInterface interface {
 	GetLikedPost(db *pgxpool.Pool) ([]int, error)
 	Init(username, email, password string) error
-	Login(db *pgxpool.Pool) (uint32, error)
+	Login(db *pgxpool.Pool) (int, error)
 	PatchLike(db *pgxpool.Pool, postID int) error
 	PutNewPassword(db *pgxpool.Pool, newPassword string) error
-	SignUp(db *pgxpool.Pool) (uint32, error)
+	SignUp(db *pgxpool.Pool) (int, error)
 }
 
 // Post is the model present in the database
@@ -42,8 +42,8 @@ type Post struct {
 	Published bool      `json:"published,omitempty"`
 	CreatedOn time.Time `json:"created_on,omitempty"`
 	UpdatedOn time.Time `json:"updated_on,omitempty"`
-	LikeCount uint      `json:"like_count,omitempty"`
-	Views     uint      `json:"views,omitempty"`
+	LikeCount int       `json:"like_count,omitempty"`
+	Views     int       `json:"views,omitempty"`
 }
 
 type PostInterface interface {
