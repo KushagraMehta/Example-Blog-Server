@@ -10,3 +10,7 @@ tasks:
     cmds:
       - psql -h localhost -p 5432 -U postgres < .\model\Delete_model.sql
     silent: true
+  test:
+    cmds:
+      - go test -v -cover ./...
+    silent: true
