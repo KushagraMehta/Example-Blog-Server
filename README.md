@@ -2,7 +2,7 @@
 
 Basic blog server written in go for CRUD operation
 
-# [Database Models](./model/readme.md)
+# [Database Models](https://github.com/KushagraMehta/Example-Blog-Server/blob/main/model/README.md)
 
 # To-do
 
@@ -11,23 +11,29 @@ Basic blog server written in go for CRUD operation
 - [x] Connect Database with GO
 - [x] Create Model Function in Golang
 - [x] Refactoring Code
-- [ ] Write Unit Test of model
+- [x] Write Unit Test of model
 - [ ] Write Mock Test on model
-- [ ] Change Error formate
 - [ ] Design All API end-points
+- [ ] Change Error formate
 - [ ] Implement API in REST
   - [ ] Write open API end-points
   - [ ] Implement JWT Authentication
   - [ ] Write Authentication Middleware
 - [ ] Write Docker File
 
-# TMP API end-points
+# Folder Structure
 
-- Post delete, delete its comment
-- Tag
-  - Create Tag
-  - Add tag on Post
-  - Delete tag from Post
-  - Get tags (Sorted)
-  - GET Tag detail By id
-  - GET Tag Post(Top By given data<length of tag_post)
+```
+.
+├── cmd                  main applications of the project
+│   └── server           the API server application
+├── pkg                  public library code
+│   ├── auth
+│   ├── error
+│   ├── middleware      access log middleware
+│   ├── model
+│   ├── response
+│   └── util
+```
+
+[📂Folder structure Inspiration](https://github.com/qiangxue/go-rest-api)
