@@ -33,18 +33,8 @@ func (p *Post) validate(action string) error {
 			return errors.New("required post id")
 		}
 		return nil
-	default:
-		if p.ID == 0 {
-			return errors.New("required post id")
-		}
-		if p.AuthorID == 0 {
-			return errors.New("required author id")
-		}
-		if p.Title == "" {
-			return errors.New("required proper title")
-		}
-		return nil
 	}
+	return errors.New("Wrong validaton option")
 }
 
 //Create will create a draft of post on the database. REQUIRE:AuthorID, Title, ?Summary

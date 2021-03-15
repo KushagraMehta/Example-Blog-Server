@@ -29,13 +29,13 @@ func (c *Comment) validation(action string) error {
 }
 
 // Post will put comment on a post. REQUIRE: postID
-func (c *Comment) Post(db *pgxpool.Pool, postID int64) error {
+func (c *Comment) Post(db *pgxpool.Pool, postID int) error {
 	if err := c.validation("create"); err != nil {
 		return err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if err := db.QueryRow(ctx, "INSERT INTO comments(AUTHOR_ID,BODY) VALUES($1,$2) returning id;", c.AuthorID, c.Body).Scan(&c.ID); err != nil {
+	if err := db.QueryRow(ctx, "INSERT INTO comments(AUTHOR_ID,BODY) VALUES($1,$2) returning id,created_on,updated_on;", c.AuthorID, c.Body).Scan(&c.ID, &c.CreatedOn, &c.UpdatedOn); err != nil {
 		return err
 	}
 	if _, err := db.Exec(ctx, "INSERT INTO POST_COMMENTS(COMMENT_ID,POST_ID) VALUES($1,$2);", c.ID, postID); err != nil {

@@ -3,7 +3,6 @@ package model
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -49,21 +48,18 @@ func (t *Tag) AttachMe(db *pgxpool.Pool, postID int) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if _, err := db.Exec(ctx, "INSERT INTO POST_TAG(POST_ID,TAG_ID) VALUES($1,$2)", postID, t.ID); err != nil {
+	if _, err := db.Exec(ctx, "INSERT INTO POST_TAGS(POST_ID,TAG_ID) VALUES($1,$2)", postID, t.ID); err != nil {
 		return err
 	}
 	return nil
 }
 
 //  Delete will remove tag from a post. REQUIRE: TagID, PostID
-func (t *Tag) Delete(db *pgxpool.Pool, postID int) error {
-	if err := t.validation("delete"); err != nil {
-		return err
-	}
+func DeleteTags(db *pgxpool.Pool, tagID, postID int) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if _, err := db.Exec(ctx, "DELETE FROM POST_TAG WHERE POST_ID=$1 AND TAG_ID=$2", postID, t.ID); err != nil {
+	if _, err := db.Exec(ctx, "DELETE FROM POST_TAGS WHERE POST_ID=$1 AND TAG_ID=$2", postID, tagID); err != nil {
 		return err
 	}
 	return nil
@@ -86,7 +82,7 @@ func GetTagsData(db *pgxpool.Pool, limit int) ([]Tag, error) {
 		}
 
 		if rows.Err() != nil {
-			fmt.Println(err)
+			return []Tag{}, err
 		}
 	}
 	return data, nil
@@ -98,7 +94,7 @@ func GetTagPosts(db *pgxpool.Pool, tagID int, limit int) ([]int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	var data []int
-	if rows, err := db.Query(ctx, "SELECT POST_ID FROM POST_TAG LIMIT $1;", limit); err != nil {
+	if rows, err := db.Query(ctx, "SELECT POST_ID FROM POST_TAGS LIMIT $1;", limit); err != nil {
 		return []int{}, err
 	} else {
 		defer rows.Close()
@@ -109,8 +105,43 @@ func GetTagPosts(db *pgxpool.Pool, tagID int, limit int) ([]int, error) {
 		}
 
 		if rows.Err() != nil {
-			fmt.Println(err)
+			return []int{}, err
 		}
+	}
+	return data, nil
+}
+
+// GetTagsOfPost Will Return all the tagsID on a post REQUIRE: postID
+func GetTagsOfPost(db *pgxpool.Pool, postID int) ([]int, error) {
+
+	var data []int
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if rows, err := db.Query(ctx, "select tag_id from post_tags where post_id=$1;", postID); err != nil {
+		return []int{}, err
+	} else {
+		defer rows.Close()
+		var tmp int
+		for rows.Next() {
+			rows.Scan(&tmp)
+			data = append(data, tmp)
+		}
+
+		if rows.Err() != nil {
+			return []int{}, err
+		}
+	}
+	return data, nil
+}
+
+// // GetTagData Will return Tag object From Database REQUIRE: TagID
+func GetTagData(db *pgxpool.Pool, tagID int) (Tag, error) {
+
+	var data Tag
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := db.QueryRow(ctx, "select id,title,summary,total_post from tags where id=$1;", tagID).Scan(&data.ID, &data.Title, &data.Summary, &data.TotalPost); err != nil {
+		return Tag{}, err
 	}
 	return data, nil
 }
