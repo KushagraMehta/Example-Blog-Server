@@ -1,27 +1,31 @@
 package auth
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
+	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-func CreateToken(user_id uint32) (string, error) {
-	claims := jwt.MapClaims{}
-	claims["authorized"] = true
-	claims["user_id"] = user_id
-	claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expires after 1 hour
+func CreateToken(user_id int) (string, error) {
+	claims := jwt.MapClaims{
+		"authorized": true,
+		"user_id":    user_id,
+		"exp":        time.Now().Add(time.Hour * 1).Unix(), //Token expires after 1 hour
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(os.Getenv("API_SECRET")))
 
 }
 
-func TokenValid(tokenString string) error {
+func TokenValid(r *http.Request) (jwt.MapClaims, error) {
+	tokenString := ExtractToken(r)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -29,15 +33,28 @@ func TokenValid(tokenString string) error {
 		return []byte(os.Getenv("API_SECRET")), nil
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		Pretty(claims)
+		return claims, nil
 	}
-	return nil
+	return nil, errors.New("invalid tokken")
 }
 
-func ExtractTokenID(tokenString string) (uint32, error) {
+func ExtractToken(r *http.Request) string {
+	keys := r.URL.Query()
+	token := keys.Get("token")
+	if token != "" {
+		return token
+	}
+	bearerToken := r.Header.Get("Authorization")
+	if len(strings.Split(bearerToken, " ")) == 2 {
+		return strings.Split(bearerToken, " ")[1]
+	}
+	return ""
+}
+
+func ExtractTokenID(tokenString string) (int, error) {
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -54,24 +71,7 @@ func ExtractTokenID(tokenString string) (uint32, error) {
 		if err != nil {
 			return 0, err
 		}
-		return uint32(uid), nil
+		return int(uid), nil
 	}
 	return 0, nil
-}
-
-//Pretty display the claims licely in the terminal
-func Pretty(data interface{}) {
-	b, err := json.MarshalIndent(data, "", " ")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	fmt.Println(string(b))
-}
-func main() {
-	token, _ := CreateToken(123123)
-	fmt.Println(token)
-	fmt.Println(TokenValid(token))
-	fmt.Println(ExtractTokenID(token))
 }

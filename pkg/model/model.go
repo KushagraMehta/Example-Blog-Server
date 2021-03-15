@@ -1,16 +1,10 @@
 package model
 
 import (
-	"context"
-	"os"
 	"time"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
-
-type DB struct {
-	db *pgxpool.Pool
-}
 
 // User is the model present in the database
 type User struct {
@@ -68,15 +62,4 @@ type Tag struct {
 	Title     string `json:"title,omitempty"`
 	Summary   string `json:"summary,omitempty"`
 	TotalPost int    `json:"total_post,omitempty"`
-}
-
-// Connect Will Start the Connection to the PostgreSQL
-func (tmp *DB) Connect() error {
-	var err error
-	databaseURL := os.Getenv("DB_URL")
-	tmp.db, err = pgxpool.Connect(context.Background(), databaseURL)
-	return err
-}
-func (tmp *DB) Close() {
-	tmp.db.Close()
 }

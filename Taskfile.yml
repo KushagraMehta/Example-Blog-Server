@@ -14,3 +14,12 @@ tasks:
     cmds:
       - go test -v -cover ./...
     silent: true
+  run:
+    cmds:
+      - go run ./cmd/server/main.go
+    silent: true
+  build:
+    cmds:
+      - GOOS=linux go build -ldflags="-s -w" -o main ./cmd/server/main.go 
+    silent: true
+
