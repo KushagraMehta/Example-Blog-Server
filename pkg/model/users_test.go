@@ -38,8 +38,8 @@ func TestUsers(t *testing.T) {
 		t.Run("Proper login With-out any error", func(t *testing.T) {
 			randomUser := createRandomUser(t)
 			cloneUser := User{
-				UserName:       randomUser.UserName,
-				PasswordHashed: randomUser.PasswordHashed,
+				UserName: randomUser.UserName,
+				Password: randomUser.Password,
 			}
 			_, err := cloneUser.Login(testDB.db)
 			require.NoError(t, err)
@@ -52,8 +52,8 @@ func TestUsers(t *testing.T) {
 		t.Run("Login With wrong Password", func(t *testing.T) {
 			randomUser := createRandomUser(t)
 			cloneUser := User{
-				UserName:       randomUser.UserName,
-				PasswordHashed: util.RandomString(6),
+				UserName: randomUser.UserName,
+				Password: util.RandomString(6),
 			}
 			_, err := cloneUser.Login(testDB.db)
 			if assert.Error(t, err) {
@@ -63,8 +63,8 @@ func TestUsers(t *testing.T) {
 		})
 		t.Run("Login With wrong email", func(t *testing.T) {
 			cloneUser := User{
-				Email:          util.RandomEmail(),
-				PasswordHashed: util.RandomString(6),
+				Email:    util.RandomEmail(),
+				Password: util.RandomString(6),
 			}
 			_, err := cloneUser.Login(testDB.db)
 			if assert.Error(t, err) {
@@ -79,9 +79,9 @@ func TestUsers(t *testing.T) {
 		t.Run("update password With username", func(t *testing.T) {
 			randomUser := createRandomUser(t)
 			cloneUser := User{
-				ID:             randomUser.ID,
-				UserName:       randomUser.UserName,
-				PasswordHashed: randomUser.PasswordHashed,
+				ID:       randomUser.ID,
+				UserName: randomUser.UserName,
+				Password: randomUser.Password,
 			}
 			err := cloneUser.PutNewPassword(testDB.db, util.RandomString(6))
 			require.NoError(t, err)
@@ -90,9 +90,9 @@ func TestUsers(t *testing.T) {
 		t.Run("update password With Email", func(t *testing.T) {
 			randomUser := createRandomUser(t)
 			cloneUser := User{
-				ID:             randomUser.ID,
-				Email:          randomUser.Email,
-				PasswordHashed: randomUser.PasswordHashed,
+				ID:       randomUser.ID,
+				Email:    randomUser.Email,
+				Password: randomUser.Password,
 			}
 			err := cloneUser.PutNewPassword(testDB.db, util.RandomString(6))
 			require.NoError(t, err)

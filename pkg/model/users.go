@@ -18,10 +18,10 @@ func hash(password string) (string, error) {
 }
 
 //Validate Function check if the user Data data is filled or not. For smooth database entry.
-func (u *User) validate(action string) error {
+func (u *User) Validate(action string) error {
 	switch strings.ToLower(action) {
 	case "signup":
-		if u.PasswordHashed == "" {
+		if u.Password == "" {
 			return errors.New("required password")
 		}
 		if u.Email == "" {
@@ -42,7 +42,7 @@ func (u *User) validate(action string) error {
 		}
 		return nil
 	default:
-		if u.PasswordHashed == "" {
+		if u.Password == "" {
 			return errors.New("required password")
 		}
 		if u.Email == "" && u.UserName == "" {
@@ -62,40 +62,40 @@ func (u *User) Init(username, email, password string) error {
 	var err error
 	u.UserName = username
 	u.Email = email
-	u.PasswordHashed, err = hash(password)
+	u.Password, err = hash(password)
 	return err
 }
 
 // SignUp will save user detail into database. REQUIRE: User Object init.
 func (u *User) SignUp(db *pgxpool.Pool) (int, error) {
-	if err := u.validate("signup"); err != nil {
+	if err := u.Validate("signup"); err != nil {
 		return 0, err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if err := db.QueryRow(ctx, "INSERT INTO users(username,email,password_hashed) VALUES ($1,$2,$3) RETURNING id, created_on,updated_on,last_login;", u.UserName, u.Email, u.PasswordHashed).Scan(&u.ID, &u.CreatedOn, &u.UpdatedOn, &u.LastLogin); err != nil {
+	if err := db.QueryRow(ctx, "INSERT INTO users(username,email,password_hashed) VALUES ($1,$2,$3) RETURNING id, created_on,updated_on,last_login;", u.UserName, u.Email, u.Password).Scan(&u.ID, &u.CreatedOn, &u.UpdatedOn, &u.LastLogin); err != nil {
 		return 0, err
 	}
 	return u.ID, nil
 }
 
-// Login will check the user detail and send the UID  REQUIRE: username|email, PasswordHashed.
+// Login will check the user detail and send the UID  REQUIRE: username|email, Password.
 func (u *User) Login(db *pgxpool.Pool) (int, error) {
 
-	if err := u.validate(""); err != nil {
+	if err := u.Validate(""); err != nil {
 		return 0, err
 	}
 
 	if u.UserName != "" {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		if err := db.QueryRow(ctx, "SELECT ID,email,created_on,updated_on,last_login FROM users WHERE username=$1 AND password_hashed=$2;", u.UserName, u.PasswordHashed).Scan(&u.ID, &u.Email, &u.CreatedOn, &u.UpdatedOn, &u.LastLogin); err != nil {
+		if err := db.QueryRow(ctx, "SELECT ID,email,created_on,updated_on,last_login FROM users WHERE username=$1 AND password_hashed=$2;", u.UserName, u.Password).Scan(&u.ID, &u.Email, &u.CreatedOn, &u.UpdatedOn, &u.LastLogin); err != nil {
 			return 0, err
 		}
 	} else {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		if err := db.QueryRow(ctx, "SELECT ID FROM users WHERE email=$1 AND password_hashed=$2;", u.Email, u.PasswordHashed).Scan(&u.ID); err != nil {
+		if err := db.QueryRow(ctx, "SELECT ID FROM users WHERE email=$1 AND password_hashed=$2;", u.Email, u.Password).Scan(&u.ID); err != nil {
 			return 0, err
 		}
 
@@ -113,22 +113,22 @@ func (u *User) Login(db *pgxpool.Pool) (int, error) {
 // PutNewPassword will update the password. REQUIRE: ID
 func (u *User) PutNewPassword(db *pgxpool.Pool, newPassword string) error {
 	var err error
-	if err := u.validate("update"); err != nil {
+	if err := u.Validate("update"); err != nil {
 		return err
 	}
-	if u.PasswordHashed, err = hash(newPassword); err != nil {
+	if u.Password, err = hash(newPassword); err != nil {
 		return err
 	}
 	if u.UserName != "" {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		if _, err := db.Exec(ctx, "UPDATE users SET password_hashed=$1, UPDATED_ON=current_timestamp WHERE id=$2;", u.PasswordHashed, u.ID); err != nil {
+		if _, err := db.Exec(ctx, "UPDATE users SET password_hashed=$1, UPDATED_ON=current_timestamp WHERE id=$2;", u.Password, u.ID); err != nil {
 			return err
 		}
 	} else {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		if _, err := db.Exec(ctx, "UPDATE users SET password_hashed=$1,UPDATED_ON=current_timestamp WHERE id=$2;", u.PasswordHashed, u.ID); err != nil {
+		if _, err := db.Exec(ctx, "UPDATE users SET password_hashed=$1,UPDATED_ON=current_timestamp WHERE id=$2;", u.Password, u.ID); err != nil {
 			return err
 		}
 	}
@@ -138,7 +138,7 @@ func (u *User) PutNewPassword(db *pgxpool.Pool, newPassword string) error {
 // GetLikedPost return the array of postID liked by user. REQUIRE: ID
 func (u *User) GetLikedPost(db *pgxpool.Pool) ([]int, error) {
 
-	if err := u.validate("update"); err != nil {
+	if err := u.Validate("update"); err != nil {
 		return []int{}, err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -164,7 +164,7 @@ func (u *User) GetLikedPost(db *pgxpool.Pool) ([]int, error) {
 
 // PatchLike will can put like/Remove like from a post. REQUIRE: ID
 func (u *User) PatchLike(db *pgxpool.Pool, postID int) error {
-	if err := u.validate("update"); err != nil {
+	if err := u.Validate("update"); err != nil {
 		return err
 	}
 	var doesLike int

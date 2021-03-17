@@ -34,7 +34,7 @@ func (p *Post) validate(action string) error {
 		}
 		return nil
 	}
-	return errors.New("Wrong validaton option")
+	return errors.New("wrong validaton option")
 }
 
 //Create will create a draft of post on the database. REQUIRE:AuthorID, Title, ?Summary

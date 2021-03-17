@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	controllers "github.com/KushagraMehta/Example-Blog-Server/pkg/controller"
 	"github.com/joho/godotenv"
@@ -22,6 +23,7 @@ func main() {
 		fmt.Println("We are getting the env values")
 	}
 	server.Initialize()
-	server.Run(":8090")
+
+	server.Run(":" + os.Getenv("SERVER_PORT"))
 	defer server.DB.Close()
 }

@@ -28,7 +28,7 @@ func (c *Comment) validation(action string) error {
 	return nil
 }
 
-// Post will put comment on a post. REQUIRE: postID
+// Post will put comment on a post. REQUIRE: postID,AuthorID,Body
 func (c *Comment) Post(db *pgxpool.Pool, postID int) error {
 	if err := c.validation("create"); err != nil {
 		return err

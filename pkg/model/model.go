@@ -8,13 +8,13 @@ import (
 
 // User is the model present in the database
 type User struct {
-	ID             int       `json:"id,omitempty"`
-	UserName       string    `json:"username,omitempty"`
-	Email          string    `json:"email,omitempty"`
-	PasswordHashed string    `json:"-"`
-	CreatedOn      time.Time `json:"created_on,omitempty"`
-	UpdatedOn      time.Time `json:"updated_on,omitempty"`
-	LastLogin      time.Time `json:"last_login,omitempty"`
+	ID        int       `json:"id,omitempty"`
+	UserName  string    `json:"username,omitempty"`
+	Email     string    `json:"email,omitempty"`
+	Password  string    `json:"-"`
+	CreatedOn time.Time `json:"created_on,omitempty"`
+	UpdatedOn time.Time `json:"updated_on,omitempty"`
+	LastLogin time.Time `json:"last_login,omitempty"`
 }
 
 type UserInterface interface {

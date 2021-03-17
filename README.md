@@ -50,10 +50,10 @@ Project requires having Go 1.16 or above and postgreSQL. Once you clone(or go ge
 - [x] Refactoring Code
 - [x] Write Unit Test of model
 - [ ] Write Mock Test on model
-- [ ] Design All API end-points
+- [x] Design All API end-points
 - [ ] Change Error formate
 - [ ] Implement API in REST
-  - [ ] Write open API end-points
-  - [ ] Implement JWT Authentication
-  - [ ] Write Authentication Middleware
+  - [x] Implement JWT Authentication
+  - [x] Write Authentication Middleware
+- [ ] Heroku Deployment
 - [ ] Write Docker File

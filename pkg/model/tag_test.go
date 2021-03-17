@@ -93,16 +93,16 @@ func TestTags(t *testing.T) {
 			randomTags = append(randomTags, tmp)
 		}
 
-		t.Run("GetTagsData Test", func(t *testing.T) {
-			tagsGot, err := GetTagsData(testDB.db, 10)
+		t.Run("GetTopTags Test", func(t *testing.T) {
+			tagsGot, err := GetTopTags(testDB.db, 10)
 			require.NoError(t, err)
 			for _, v := range tagsGot {
 				require.True(t, findTag(v.ID, randomTags))
 			}
 			cleanTable(t)
 		})
-		t.Run("GetTagPosts Test", func(t *testing.T) {
-			postID, err := GetTagPosts(testDB.db, randomTags[0].ID, 10)
+		t.Run("GetPostsOfTag Test", func(t *testing.T) {
+			postID, err := GetPostsOfTag(testDB.db, randomTags[0].ID, 10)
 			require.NoError(t, err)
 
 			for _, v := range postID {

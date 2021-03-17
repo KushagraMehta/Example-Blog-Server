@@ -65,8 +65,8 @@ func DeleteTags(db *pgxpool.Pool, tagID, postID int) error {
 	return nil
 }
 
-// GetTagsData bring Top tags with data by limit, REQUIRE:Limit
-func GetTagsData(db *pgxpool.Pool, limit int) ([]Tag, error) {
+// GetTopTags bring Top tags with data by limit, REQUIRE:Limit
+func GetTopTags(db *pgxpool.Pool, limit int) ([]Tag, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -88,8 +88,8 @@ func GetTagsData(db *pgxpool.Pool, limit int) ([]Tag, error) {
 	return data, nil
 }
 
-//GetTagPosts bring PostID's related to a tag
-func GetTagPosts(db *pgxpool.Pool, tagID int, limit int) ([]int, error) {
+//GetPostsOfTag bring PostID's related to a tag
+func GetPostsOfTag(db *pgxpool.Pool, tagID int, limit int) ([]int, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
