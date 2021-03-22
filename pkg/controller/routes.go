@@ -26,14 +26,14 @@ func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/posts/draft/{id:[0-9]+}", middlewares.Auth(middlewares.JSON(s.GetDraft))).Methods("GET")
 	s.Router.HandleFunc("/posts/draft/{id:[0-9]+}", middlewares.Auth(middlewares.JSON(s.PatchDrafted))).Methods("PATCH")
 	s.Router.HandleFunc("/posts/{postId:[0-9]+}/tags", middlewares.JSON(s.GetTagsOfPost)).Methods("GET")
-	s.Router.HandleFunc("/posts/tag/{id:[0-9]+}/", middlewares.JSON(s.GetPostsOfTag)).Methods("GET")
+	s.Router.HandleFunc("/posts/tag/{id:[0-9]+}/{limit:[0-9]+}", middlewares.JSON(s.GetPostsOfTag)).Methods("GET")
 
 	// Tags
 	s.Router.HandleFunc("/tags", middlewares.Auth(middlewares.JSON(s.TagCreate))).Methods("POST")
 	s.Router.HandleFunc("/tags/{id:[0-9]+}", middlewares.JSON(s.GetTagData)).Methods("GET")
 	s.Router.HandleFunc("/tags/top/{limit:[0-9]+}", middlewares.JSON(s.GetTopTags)).Methods("GET")
 	s.Router.HandleFunc("/tags/{postid:[0-9]+}/{id:[0-9]+}", middlewares.Auth(middlewares.JSON(s.DeleteTags))).Methods("DELETE")
-	s.Router.HandleFunc("/tags/add/{id:[0-9]+}", middlewares.Auth(middlewares.JSON(s.AttachMe))).Methods("POST")
+	s.Router.HandleFunc("/tags/{id:[0-9]+}/add/{postid:[0-9]+}", middlewares.Auth(middlewares.JSON(s.AttachMe))).Methods("POST")
 
 	// Comments
 	s.Router.HandleFunc("/comments/{postid:[0-9]+}", middlewares.JSON(s.GetComments)).Methods("GET")

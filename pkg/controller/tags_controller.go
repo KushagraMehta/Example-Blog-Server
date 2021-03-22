@@ -91,22 +91,34 @@ func (server *Server) DeleteTags(w http.ResponseWriter, r *http.Request) {
 
 func (server *Server) AttachMe(w http.ResponseWriter, r *http.Request) {
 
-	// 	var tag model.Tag
-	// 	vars := mux.Vars(r)
-	// 	body, err := ioutil.ReadAll(r.Body)
-	// 	if err != nil {
-	// 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
-	// 		return
-	// 	}
-	// 	id, err := strconv.ParseInt(vars["id"], 10, 64)
-	// 	if err != nil {
-	// 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
-	// 		return
-	// 	}
-	// 	err = json.Marshal(body, &tag)
-	// 	if err != nil {
-	// 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
-	// 		return
-	// 	}
-	// 	tag.AttachMe(server.DB)
+	var tag model.Tag
+	vars := mux.Vars(r)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	id, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	postid, err := strconv.ParseInt(vars["postid"], 10, 64)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	tag.ID = int(id)
+	err = json.Unmarshal(body, &tag)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	err = tag.AttachMe(server.DB, int(postid))
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, "Done")
 }
