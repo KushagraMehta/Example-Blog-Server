@@ -4,11 +4,11 @@ tasks:
   migration:
     cmds:
       - createdb -h localhost -p 5432 -U postgres blog
-      - psql -h localhost -p 5432 -U postgres blog < .\model\Init_model.sql
+      - psql -h localhost -p 5432 -U postgres blog < .\pkg\model\Init_model.sql
     silent: true
   demigration:
     cmds:
-      - psql -h localhost -p 5432 -U postgres < .\model\Delete_model.sql
+      - psql -h localhost -p 5432 -U postgres < .\pkg\model\Delete_model.sql
     silent: true
   test:
     cmds:
@@ -20,6 +20,5 @@ tasks:
     silent: true
   build:
     cmds:
-      - GOOS=linux go build -ldflags="-s -w" -o main ./cmd/server/main.go 
+      - GOOS=linux go build -ldflags="-s -w" -o main ./cmd/server/main.go
     silent: true
-
