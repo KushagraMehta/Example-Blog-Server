@@ -1,1 +1,0 @@
-web: go mod download && go get -u github.com/go-task/task/v3/cmd/task && task migration  && task build && ./main
