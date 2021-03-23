@@ -16,7 +16,7 @@ tasks:
     silent: true
   run:
     cmds:
-      - go run ./cmd/server/main.go
+      - LOCAL=1 go run ./cmd/server/main.go
     silent: true
   build:
     cmds:

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -12,18 +11,22 @@ import (
 var server = controllers.Server{}
 
 func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Print("sad .env file found")
+	if os.Getenv("LOCAL") == "1" {
+		log.Print("Running Locally")
+		if err := godotenv.Load(); err != nil {
+			log.Print("sad .env file not found")
+		} else {
+
+			log.Print("We are getting the env values")
+		}
+	} else {
+
+		log.Print("Running on server")
 	}
 }
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Error getting env, %v", err)
-	} else {
-		fmt.Println("We are getting the env values")
-	}
 	server.Initialize()
 
-	server.Run(":" + os.Getenv("SERVER_PORT"))
+	server.Run(":" + os.Getenv("PORT"))
 	defer server.DB.Close()
 }
