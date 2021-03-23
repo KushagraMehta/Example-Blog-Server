@@ -1,5 +1,7 @@
 module github.com/KushagraMehta/Example-Blog-Server
 
+// +heroku goVersion 1.16
+// +heroku install ./cmd/...
 go 1.16
 
 require (
