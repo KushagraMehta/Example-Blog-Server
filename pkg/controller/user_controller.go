@@ -9,7 +9,6 @@ import (
 	"github.com/KushagraMehta/Example-Blog-Server/pkg/auth"
 	"github.com/KushagraMehta/Example-Blog-Server/pkg/model"
 	"github.com/KushagraMehta/Example-Blog-Server/pkg/responses"
-	"github.com/KushagraMehta/Example-Blog-Server/pkg/util"
 	"github.com/gorilla/mux"
 )
 
@@ -22,25 +21,27 @@ func (server *Server) Login(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
+	type password struct {
+		Password string `json:"password"`
+	}
+	var pass password
 	tmpUser := model.User{}
-	err = json.Unmarshal(body, &tmpUser)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+	if err = json.Unmarshal(body, &tmpUser); err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	if err := user.Init(tmpUser.UserName, tmpUser.Email, tmpUser.Password); err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+	if err = json.Unmarshal(body, &pass); err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	_, err = user.Login(server.DB)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+	user.Init(tmpUser.UserName, tmpUser.Email, pass.Password)
+	if _, err = user.Login(server.DB); err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	token, err = auth.CreateToken(user.ID)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+	if token, err = auth.CreateToken(user.ID); err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
@@ -48,32 +49,33 @@ func (server *Server) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) SignUp(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
 	var user model.User
 	var token string
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 	tmpUser := model.User{}
-	err = json.Unmarshal(body, &tmpUser)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+	type password struct {
+		Password string `json:"password"`
+	}
+	var pass password
+	if err = json.Unmarshal(body, &tmpUser); err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-
-	if err := user.Init(tmpUser.UserName, tmpUser.Email, tmpUser.Password); err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+	if err = json.Unmarshal(body, &pass); err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	_, err = user.SignUp(server.DB)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+	user.Init(tmpUser.UserName, tmpUser.Email, pass.Password)
+	if _, err = user.SignUp(server.DB); err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	token, err = auth.CreateToken(user.ID)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+	if token, err = auth.CreateToken(user.ID); err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 

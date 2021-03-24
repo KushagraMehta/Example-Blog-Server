@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -34,7 +33,6 @@ func cleanTable(t *testing.T) {
 func TestMain(m *testing.M) {
 	var err error
 	DBURL := os.Getenv("DATABASE_URL")
-	fmt.Println(DBURL)
 	if testDB.db, err = pgxpool.Connect(context.Background(), DBURL); err != nil {
 		log.Fatal("Unable to connect to database: ", err)
 	}

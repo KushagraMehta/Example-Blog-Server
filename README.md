@@ -23,6 +23,8 @@ Project requires having Go 1.16 or above and postgreSQL. Once you clone(or go ge
 
 - ### [Database Methods](https://pkg.go.dev/github.com/KushagraMehta/Example-Blog-Server/pkg/model)
 
+- ### [API end-points](https://github.com/KushagraMehta/Example-Blog-Server/blob/main/pkg/controller/README.md)
+
 - ### Folder Structure
 
   ```

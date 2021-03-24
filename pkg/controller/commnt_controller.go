@@ -9,7 +9,6 @@ import (
 	"github.com/KushagraMehta/Example-Blog-Server/pkg/auth"
 	"github.com/KushagraMehta/Example-Blog-Server/pkg/model"
 	"github.com/KushagraMehta/Example-Blog-Server/pkg/responses"
-	"github.com/KushagraMehta/Example-Blog-Server/pkg/util"
 	"github.com/gorilla/mux"
 )
 
@@ -17,12 +16,12 @@ func (server *Server) GetComments(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID, err := strconv.ParseInt(vars["postid"], 10, 64)
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 	comments, err := model.GetComments(server.DB, postID)
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 	responses.JSON(w, http.StatusOK, comments)
@@ -38,7 +37,7 @@ func (server *Server) PostComment(w http.ResponseWriter, r *http.Request) {
 
 	postID, err := strconv.ParseInt(vars["postid"], 10, 64)
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
@@ -46,12 +45,12 @@ func (server *Server) PostComment(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body, &comment)
 	comment.AuthorID, err = auth.ExtractTokenID(r)
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 	err = comment.Post(server.DB, int(postID))
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
@@ -69,7 +68,7 @@ func (server *Server) DeleteComment(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body, &comment)
 	err = comment.Delete(server.DB)
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 

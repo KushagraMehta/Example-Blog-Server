@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -24,10 +23,10 @@ func (server *Server) Initialize() {
 
 	DBURL := os.Getenv("DATABASE_URL")
 	if server.DB, err = pgxpool.Connect(context.Background(), DBURL); err != nil {
-		fmt.Println("Cannot connect to database")
+		log.Println("Cannot connect to database")
 		log.Fatal("This is the error:", err)
 	} else {
-		fmt.Println("We are connected to the database")
+		log.Println("We are connected to the database")
 	}
 	server.Router = mux.NewRouter()
 
@@ -36,7 +35,7 @@ func (server *Server) Initialize() {
 
 func (server *Server) Run(port string) {
 
-	fmt.Printf("Listening to port %s\n", port)
+	log.Printf("Listening to port %s\n", port)
 	srv := &http.Server{
 		Handler:      server.Router,
 		Addr:         port,

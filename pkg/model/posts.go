@@ -3,7 +3,6 @@ package model
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -114,7 +113,7 @@ func GetTopPostIDs(db *pgxpool.Pool, limit int) ([]int, error) {
 		}
 
 		if rows.Err() != nil {
-			fmt.Println(err)
+			return []int{}, err
 		}
 	}
 	return data, nil

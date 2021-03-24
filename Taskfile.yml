@@ -22,3 +22,11 @@ tasks:
     cmds:
       - GOOS=linux go build -ldflags="-s -w" -o main ./cmd/server/main.go
     silent: true
+  cloudm:
+    cmds:
+      - heroku pg:psql --app blog-ser < .\pkg\model\Init_model.sql
+    silent: true
+  cloudd:
+    cmds:
+      - heroku pg:psql --app blog-ser < .\pkg\model\Delete_model.sql
+    silent: true

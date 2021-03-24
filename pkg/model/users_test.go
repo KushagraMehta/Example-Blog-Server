@@ -10,10 +10,9 @@ import (
 
 func createRandomUser(t *testing.T) User {
 	var testUser User
-	err := testUser.Init(util.RandomOwner(), util.RandomEmail(), util.RandomString(6))
-	require.NoError(t, err)
+	testUser.Init(util.RandomOwner(), util.RandomEmail(), util.RandomString(6))
 
-	_, err = testUser.SignUp(testDB.db)
+	_, err := testUser.SignUp(testDB.db)
 	require.NoError(t, err)
 	require.NotEmpty(t, testUser.ID)
 	require.NotZero(t, testUser.CreatedOn)
@@ -57,7 +56,7 @@ func TestUsers(t *testing.T) {
 			}
 			_, err := cloneUser.Login(testDB.db)
 			if assert.Error(t, err) {
-				require.Equal(t, err.Error(), "no rows in result set")
+				require.Equal(t, err.Error(), "wrong password")
 			}
 			cleanTable(t)
 		})

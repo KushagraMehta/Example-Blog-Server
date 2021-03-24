@@ -17,6 +17,10 @@ func hash(password string) (string, error) {
 	return string(hashedValue), err
 }
 
+func verifyPassword(hashedPassword, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+
 //Validate Function check if the user Data data is filled or not. For smooth database entry.
 func (u *User) Validate(action string) error {
 	switch strings.ToLower(action) {
@@ -58,22 +62,26 @@ func (u *User) Validate(action string) error {
 }
 
 // init will initiate user object value.
-func (u *User) Init(username, email, password string) error {
-	var err error
+func (u *User) Init(username, email, password string) {
 	u.UserName = username
 	u.Email = email
-	u.Password, err = hash(password)
-	return err
+	u.Password = password
 }
 
 // SignUp will save user detail into database. REQUIRE: User Object init.
 func (u *User) SignUp(db *pgxpool.Pool) (int, error) {
+	var hashedPassword string
+	var err error
 	if err := u.Validate("signup"); err != nil {
 		return 0, err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if err := db.QueryRow(ctx, "INSERT INTO users(username,email,password_hashed) VALUES ($1,$2,$3) RETURNING id, created_on,updated_on,last_login;", u.UserName, u.Email, u.Password).Scan(&u.ID, &u.CreatedOn, &u.UpdatedOn, &u.LastLogin); err != nil {
+	if hashedPassword, err = hash(u.Password); err != nil {
+		return 0, err
+	}
+
+	if err := db.QueryRow(ctx, "INSERT INTO users(username,email,password_hashed) VALUES ($1,$2,$3) RETURNING id, created_on,updated_on,last_login;", u.UserName, u.Email, hashedPassword).Scan(&u.ID, &u.CreatedOn, &u.UpdatedOn, &u.LastLogin); err != nil {
 		return 0, err
 	}
 	return u.ID, nil
@@ -85,20 +93,22 @@ func (u *User) Login(db *pgxpool.Pool) (int, error) {
 	if err := u.Validate(""); err != nil {
 		return 0, err
 	}
-
+	var hashedPassword string
 	if u.UserName != "" {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		if err := db.QueryRow(ctx, "SELECT ID,email,created_on,updated_on,last_login FROM users WHERE username=$1 AND password_hashed=$2;", u.UserName, u.Password).Scan(&u.ID, &u.Email, &u.CreatedOn, &u.UpdatedOn, &u.LastLogin); err != nil {
+		if err := db.QueryRow(ctx, "SELECT ID,email,created_on,updated_on,last_login,password_hashed FROM users WHERE username=$1;", u.UserName).Scan(&u.ID, &u.Email, &u.CreatedOn, &u.UpdatedOn, &u.LastLogin, &hashedPassword); err != nil {
 			return 0, err
 		}
 	} else {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		if err := db.QueryRow(ctx, "SELECT ID FROM users WHERE email=$1 AND password_hashed=$2;", u.Email, u.Password).Scan(&u.ID); err != nil {
+		if err := db.QueryRow(ctx, "SELECT ID,email,created_on,updated_on,last_login,password_hashed FROM users WHERE email=$1;", u.Email).Scan(&u.ID, &u.Email, &u.CreatedOn, &u.UpdatedOn, &u.LastLogin, &hashedPassword); err != nil {
 			return 0, err
 		}
-
+	}
+	if err := verifyPassword(hashedPassword, u.Password); err != nil {
+		return 0, errors.New("wrong password")
 	}
 	ctx2, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

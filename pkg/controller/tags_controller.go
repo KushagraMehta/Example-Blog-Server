@@ -8,7 +8,6 @@ import (
 
 	"github.com/KushagraMehta/Example-Blog-Server/pkg/model"
 	"github.com/KushagraMehta/Example-Blog-Server/pkg/responses"
-	"github.com/KushagraMehta/Example-Blog-Server/pkg/util"
 	"github.com/gorilla/mux"
 )
 
@@ -27,7 +26,7 @@ func (server *Server) TagCreate(w http.ResponseWriter, r *http.Request) {
 	err = tag.Create(server.DB)
 
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, util.FormatError(err))
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
